@@ -30,7 +30,7 @@ same configuration file, so an existing setup is picked up as is.
 Plugins > Install Plugin, paste the `.plg` URL:
 
 ```
-https://gitlab.onthenile.net/brainchill/unraid-iscsi/-/raw/main/iscsi.manager.plg
+https://raw.githubusercontent.com/brainchillz/unraid-iscsi-manager/main/iscsi.manager.plg
 ```
 
 That downloads a single ~10 MB package to the flash drive, installs it, loads
