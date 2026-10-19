@@ -12,7 +12,7 @@
 <!ENTITY supportURL "https://github.com/brainchillz/unraid-iscsi-manager">
 <!ENTITY plugin     "/boot/config/plugins/&name;">
 <!ENTITY emhttp     "/usr/local/emhttp/plugins/&name;">
-<!ENTITY packageMD5 "e2d08a11cd2540b4e246926299878ca4">
+<!ENTITY packageMD5 "9bae4f5b93454dd0b49cecabfa1da90c">
 ]>
 
 <PLUGIN name="&name;"
