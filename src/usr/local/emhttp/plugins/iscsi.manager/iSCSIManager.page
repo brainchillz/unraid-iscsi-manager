@@ -1,0 +1,38 @@
+Menu="Utilities"
+Type="xmenu"
+Title="iSCSI Manager"
+Icon="iscsi.png"
+Tag="hdd-o"
+---
+<?PHP
+/* iSCSI Manager for Unraid
+ *
+ * A single-page manager for LIO iSCSI targets: backstores, targets, LUNs,
+ * initiator ACLs, CHAP, portals and live sessions. Everything is rendered by
+ * javascript/iscsi.js from the JSON produced by include/iscsi_ctl.py.
+ */
+$docroot = $docroot ?? $_SERVER['DOCUMENT_ROOT'] ?: '/usr/local/emhttp';
+$plugin  = 'iscsi.manager';
+$pkg_ver = trim(@file_get_contents("$docroot/plugins/$plugin/VERSION") ?: 'dev');
+$runtime = is_executable('/usr/bin/targetcli') && is_dir('/usr/lib/python3.9/site-packages');
+$configfs = is_dir('/sys/kernel/config/target') || (@exec('modprobe -n target_core_mod 2>/dev/null; echo $?') === '0');
+$array_started = ($var['fsState'] ?? '') === 'Started';
+?>
+<link type="text/css" rel="stylesheet" href="<?autov("/plugins/$plugin/styles/iscsi.css")?>">
+<script src="<?autov("/plugins/$plugin/javascript/iscsi.js")?>"></script>
+
+<div id="iscsi-app" class="iscsi-app" data-version="<?=htmlspecialchars($pkg_ver)?>" data-array="<?=$array_started ? 'started' : 'stopped'?>" data-hostname="<?=htmlspecialchars(gethostname())?>">
+<?if (!$runtime):?>
+<div class="iscsi-notice warn"><b>The iSCSI runtime (targetcli / rtslib) is not installed.</b> Reinstall the plugin, or check the system log for the package download error.</div>
+<?elseif (!$configfs):?>
+<div class="iscsi-notice warn"><b>The kernel target modules are not available.</b> This Unraid kernel does not include LIO target support.</div>
+<?else:?>
+<?if (!$array_started):?>
+<div class="iscsi-notice info">The array is not started. Image files on the array are unavailable until it starts, and the saved configuration is restored when the array comes up.</div>
+<?endif;?>
+<div id="iscsi-root"><div class="iscsi-loading"><span class="spinner"></span> Loading iSCSI configuration&hellip;</div></div>
+<script>
+$(function(){ iSCSI.init(document.getElementById('iscsi-app')); });
+</script>
+<?endif;?>
+</div>

@@ -1,0 +1,12 @@
+#!/bin/bash
+# iSCSI Manager: tear down the LIO configuration before the array unmounts,
+# otherwise open fileio images keep the shares busy and the array cannot stop.
+# The configuration is already persisted in /etc/target/saveconfig.json and is
+# restored by the disks_mounted hook.
+[ -d /usr/local/emhttp/plugins/unraid.iSCSI/event ] && exit 0
+[ -x /usr/bin/targetcli ] || exit 0
+
+if [ -n "$(ls /sys/kernel/config/target/iscsi 2>/dev/null | grep '^iqn')" ]; then
+  logger -t iscsi.manager "array stopping: clearing live iSCSI configuration (saved config is kept)"
+  targetcli clearconfig confirm=True 2>&1 | logger -t iscsi.manager
+fi

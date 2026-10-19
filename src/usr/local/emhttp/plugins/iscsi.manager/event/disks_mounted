@@ -1,0 +1,15 @@
+#!/bin/bash
+# iSCSI Manager: restore the saved LIO configuration once the array is up,
+# because fileio images normally live on array/pool shares.
+#
+# If the original unraid.iSCSI plugin is also installed, it already does this
+# from its own event hook, so we stay out of the way to avoid a double restore.
+[ -d /usr/local/emhttp/plugins/unraid.iSCSI/event ] && exit 0
+[ -x /usr/bin/targetcli ] || exit 0
+[ -s /etc/target/saveconfig.json ] || exit 0
+
+# Only restore when nothing is configured yet (e.g. first array start after boot).
+if [ -z "$(ls /sys/kernel/config/target/iscsi 2>/dev/null | grep '^iqn')" ]; then
+  logger -t iscsi.manager "array started: restoring iSCSI configuration"
+  targetcli restoreconfig 2>&1 | logger -t iscsi.manager
+fi

@@ -1,0 +1,467 @@
+/* iSCSI Manager for Unraid
+ * Layout borrowed from NexusDashboard (cards, flat tables, status badges,
+ * centred modals) but coloured entirely from Unraid's theme variables so it
+ * follows the white / black / azure / gray themes automatically.
+ */
+#iscsi-app {
+  --is-bg: var(--background-color, #1b1c1e);
+  --is-card: var(--mild-background-color, #242528);
+  --is-border: var(--border-color, #3a3833);
+  --is-border-soft: var(--table-border-color, #2f2e2b);
+  --is-text: var(--text-color, #d8d4cc);
+  --is-muted: var(--alt-text-color, #8f8b82);
+  --is-primary: var(--brand-orange, #f15a2c);
+  --is-green: var(--green-500, #82a35c);
+  --is-yellow: var(--yellow-500, #d09c3c);
+  --is-red: var(--red-500, #cf545e);
+  --is-input-bg: var(--input-bg-color, var(--background-color, #1b1c1e));
+  --is-input-border: var(--input-border-color, var(--border-color, #3a3833));
+  --is-hover: var(--hover-table-row-background-color, rgba(128,128,128,0.08));
+  --is-mono: ui-monospace, 'SF Mono', SFMono-Regular, Menlo, Consolas, monospace;
+  --is-radius: 3px;
+  color: var(--is-text);
+  font-size: 1.3rem;
+  line-height: 1.45;
+  margin: 0 0 24px;
+}
+#iscsi-app *, #iscsi-app *::before, #iscsi-app *::after { box-sizing: border-box; }
+#iscsi-app code, #iscsi-app .mono { font-family: var(--is-mono); font-size: 0.95em; }
+#iscsi-app .muted { color: var(--is-muted); }
+#iscsi-app .nowrap { white-space: nowrap; }
+#iscsi-app .right { text-align: right; }
+
+/* ── notices ───────────────────────────────────────────────── */
+#iscsi-app .iscsi-notice {
+  border: 1px solid var(--is-border);
+  border-left: 3px solid var(--is-yellow);
+  background: var(--is-card);
+  padding: 10px 14px;
+  margin: 8px 0 14px;
+  border-radius: var(--is-radius);
+}
+#iscsi-app .iscsi-notice.info { border-left-color: var(--is-primary); }
+#iscsi-app .iscsi-notice.warn { border-left-color: var(--is-yellow); }
+#iscsi-app .iscsi-notice.error { border-left-color: var(--is-red); }
+#iscsi-app .iscsi-loading { padding: 30px 0; color: var(--is-muted); }
+
+/* ── summary cards ─────────────────────────────────────────── */
+#iscsi-app .is-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 10px;
+  margin: 8px 0 14px;
+}
+#iscsi-app .is-card {
+  background: var(--is-card);
+  border: 1px solid var(--is-border);
+  border-radius: var(--is-radius);
+  padding: 12px 14px;
+}
+#iscsi-app .is-card .lbl {
+  font-size: 1.1rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--is-muted);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+#iscsi-app .is-card .big {
+  font-size: 2.2rem;
+  font-weight: 500;
+  font-family: var(--is-mono);
+  font-variant-numeric: tabular-nums;
+  margin: 4px 0 2px;
+}
+#iscsi-app .is-card .sub { font-size: 1.15rem; color: var(--is-muted); font-family: var(--is-mono); }
+
+/* ── toolbar / section headings ────────────────────────────── */
+#iscsi-app .is-toolbar {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  align-items: center;
+  margin: 0 0 16px;
+}
+#iscsi-app .is-toolbar .spacer { flex: 1; }
+#iscsi-app h3.is-h {
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin: 22px 0 8px;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--is-text);
+  text-transform: none;
+  letter-spacing: 0;
+}
+#iscsi-app h3.is-h .count { color: var(--is-muted); font-weight: 400; font-family: var(--is-mono); font-size: 1.2rem; }
+#iscsi-app h4.is-h4 {
+  font-size: 1.2rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--is-muted);
+  margin: 0 0 6px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+#iscsi-app h4.is-h4 .btn { margin-left: auto; }
+#iscsi-app p.help { font-size: 1.2rem; color: var(--is-muted); margin: 4px 0 10px; }
+
+/* ── buttons (override Unraid's global button styling) ─────── */
+#iscsi-app .btn {
+  appearance: none;
+  -webkit-appearance: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background: var(--is-primary);
+  color: #fff;
+  border: 1px solid transparent;
+  border-radius: var(--is-radius);
+  padding: 5px 11px;
+  margin: 0;
+  font: inherit;
+  font-size: 1.25rem;
+  font-weight: 500;
+  line-height: 1.3;
+  cursor: pointer;
+  text-transform: none;
+  letter-spacing: 0;
+  box-shadow: none;
+  text-shadow: none;
+  background-image: none;
+  min-width: 0;
+  white-space: nowrap;
+}
+#iscsi-app .btn:hover { filter: brightness(1.12); background-image: none; color: #fff; }
+#iscsi-app .btn:disabled { opacity: 0.5; cursor: default; filter: none; }
+#iscsi-app .btn.btn-sm { padding: 3px 8px; font-size: 1.15rem; }
+#iscsi-app .btn.btn-outline {
+  background: transparent;
+  color: var(--is-text);
+  border-color: var(--is-border);
+}
+#iscsi-app .btn.btn-outline:hover { border-color: var(--is-muted); color: var(--is-text); filter: none; }
+#iscsi-app .btn.btn-danger { background: var(--is-red); }
+#iscsi-app .btn.btn-ghost {
+  background: transparent;
+  color: var(--is-muted);
+  border-color: transparent;
+  padding-left: 6px; padding-right: 6px;
+}
+#iscsi-app .btn.btn-ghost:hover { color: var(--is-text); background: var(--is-hover); filter: none; }
+#iscsi-app .btn.btn-ghost.danger:hover { color: var(--is-red); }
+#iscsi-app .btn.working { pointer-events: none; opacity: 0.6; }
+
+/* ── tables ────────────────────────────────────────────────── */
+#iscsi-app table.is-table {
+  width: 100%;
+  border-collapse: collapse;
+  border-spacing: 0;
+  margin: 0;
+  background: transparent;
+  font-size: 1.25rem;
+}
+#iscsi-app table.is-table th, #iscsi-app table.is-table td {
+  padding: 6px 8px;
+  text-align: left;
+  vertical-align: middle;
+  border: 0;
+  border-bottom: 1px solid var(--is-border-soft);
+  background: transparent;
+  color: var(--is-text);
+  line-height: 1.35;
+}
+#iscsi-app table.is-table thead th {
+  font-size: 1.05rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--is-muted);
+  border-bottom: 1px solid var(--is-border);
+  white-space: nowrap;
+}
+#iscsi-app table.is-table tbody tr:hover td { background: var(--is-hover); }
+#iscsi-app table.is-table tbody tr.empty td { color: var(--is-muted); font-style: italic; }
+#iscsi-app table.is-table td.actions { text-align: right; white-space: nowrap; width: 1%; }
+#iscsi-app table.is-table td.actions .btn + .btn { margin-left: 4px; }
+#iscsi-app table.is-table td.num { font-family: var(--is-mono); font-variant-numeric: tabular-nums; }
+#iscsi-app .is-tablewrap { overflow-x: auto; }
+
+/* ── badges & dots ─────────────────────────────────────────── */
+#iscsi-app .badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 1.05rem;
+  font-weight: 500;
+  padding: 1px 7px;
+  border-radius: 10px;
+  border: 1px solid var(--is-border);
+  color: var(--is-muted);
+  white-space: nowrap;
+  line-height: 1.5;
+  vertical-align: middle;
+}
+#iscsi-app .badge::before {
+  content: '';
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+  flex: none;
+}
+#iscsi-app .badge.green { color: var(--is-green); border-color: color-mix(in srgb, var(--is-green) 45%, transparent); }
+#iscsi-app .badge.yellow { color: var(--is-yellow); border-color: color-mix(in srgb, var(--is-yellow) 45%, transparent); }
+#iscsi-app .badge.red { color: var(--is-red); border-color: color-mix(in srgb, var(--is-red) 45%, transparent); }
+#iscsi-app .badge.orange { color: var(--is-primary); border-color: color-mix(in srgb, var(--is-primary) 45%, transparent); }
+#iscsi-app .badge.gray::before { background: transparent; border: 1px solid currentColor; }
+#iscsi-app .badge.plain::before { display: none; }
+#iscsi-app .dot {
+  display: inline-block;
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: var(--is-muted);
+  margin-right: 6px;
+  vertical-align: middle;
+  opacity: 0.5;
+}
+#iscsi-app .dot.on { background: var(--is-green); opacity: 1; box-shadow: 0 0 0 3px color-mix(in srgb, var(--is-green) 25%, transparent); }
+#iscsi-app .dot.warn { background: var(--is-yellow); opacity: 1; }
+
+/* ── target cards ──────────────────────────────────────────── */
+#iscsi-app .tgt {
+  background: var(--is-card);
+  border: 1px solid var(--is-border);
+  border-radius: var(--is-radius);
+  margin: 0 0 12px;
+}
+#iscsi-app .tgt.disabled { opacity: 0.75; }
+#iscsi-app .tgt-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--is-border-soft);
+  flex-wrap: wrap;
+}
+#iscsi-app .tgt-head .toggle {
+  appearance: none;
+  background: transparent;
+  border: 0;
+  color: var(--is-muted);
+  cursor: pointer;
+  padding: 0 2px;
+  font: inherit;
+  font-size: 1.3rem;
+  width: 18px;
+  transition: transform 0.15s;
+}
+#iscsi-app .tgt.collapsed .tgt-head .toggle { transform: rotate(-90deg); }
+#iscsi-app .tgt-title { display: flex; flex-direction: column; min-width: 0; flex: 1; }
+#iscsi-app .tgt-title .name { font-weight: 600; font-size: 1.4rem; }
+#iscsi-app .tgt-title .iqn { font-family: var(--is-mono); color: var(--is-muted); font-size: 1.15rem; word-break: break-all; }
+#iscsi-app .tgt-badges { display: flex; gap: 6px; flex-wrap: wrap; }
+#iscsi-app .tgt-actions { display: flex; gap: 4px; margin-left: auto; }
+#iscsi-app .tgt-body {
+  display: grid;
+  grid-template-columns: minmax(0, 1.1fr) minmax(0, 2fr) minmax(0, 0.7fr);
+  gap: 0;
+}
+#iscsi-app .tgt.collapsed .tgt-body { display: none; }
+#iscsi-app .tgt-col { padding: 12px 14px; min-width: 0; overflow: hidden; }
+#iscsi-app .tgt-col table.is-table { table-layout: auto; max-width: 100%; }
+#iscsi-app .tgt-col td code { word-break: break-all; }
+#iscsi-app .tgt-col td.actions { padding-left: 4px; padding-right: 4px; }
+#iscsi-app .tgt-col + .tgt-col { border-left: 1px solid var(--is-border-soft); }
+@media (max-width: 1100px) {
+  #iscsi-app .tgt-body { grid-template-columns: 1fr; }
+  #iscsi-app .tgt-col + .tgt-col { border-left: 0; border-top: 1px solid var(--is-border-soft); }
+}
+#iscsi-app .acl-luns { font-family: var(--is-mono); font-size: 1.1rem; color: var(--is-muted); }
+#iscsi-app .acl-luns .ro { color: var(--is-yellow); }
+#iscsi-app .sess-line { font-size: 1.1rem; color: var(--is-muted); font-family: var(--is-mono); }
+
+/* ── forms ─────────────────────────────────────────────────── */
+#iscsi-app .fg, .is-modal .fg { margin: 0 0 12px; }
+#iscsi-app .fg label, .is-modal .fg > label {
+  display: block;
+  font-size: 1.15rem;
+  color: var(--is-muted);
+  margin: 0 0 4px;
+  text-align: left;
+  width: auto;
+  padding: 0;
+}
+.is-modal .fg input[type=text], .is-modal .fg input[type=password], .is-modal .fg input[type=number],
+.is-modal .fg select, .is-modal .fg textarea {
+  width: 100%;
+  margin: 0;
+  padding: 6px 9px;
+  font: inherit;
+  font-size: 1.25rem;
+  color: var(--text-color, #d8d4cc);
+  background: var(--background-color, #1b1c1e);
+  border: 1px solid var(--border-color, #3a3833);
+  border-radius: 3px;
+  box-shadow: none;
+  max-width: none;
+}
+.is-modal .fg input::placeholder { color: var(--alt-text-color, #8f8b82); opacity: 0.7; }
+.is-modal .checklist { background: var(--background-color, #1b1c1e); border-color: var(--border-color, #3a3833); }
+.is-modal .fg input.mono { font-family: var(--is-mono); }
+.is-modal .fg input:focus, .is-modal .fg select:focus { outline: none; border-color: var(--is-primary); }
+.is-modal .fg .row { display: flex; gap: 8px; }
+.is-modal .fg .row > * { flex: 1; min-width: 0; }
+.is-modal .fg.inline { display: flex; align-items: center; gap: 8px; }
+.is-modal .fg.inline label { margin: 0; color: var(--is-text); font-size: 1.25rem; display: inline; }
+.is-modal .fg.inline input[type=checkbox] { width: auto; margin: 0; }
+.is-modal .checklist {
+  border: 1px solid var(--is-input-border);
+  border-radius: var(--is-radius);
+  max-height: 220px;
+  overflow: auto;
+  background: var(--is-input-bg);
+}
+.is-modal .checklist label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 9px;
+  border-bottom: 1px solid var(--is-border-soft);
+  cursor: pointer;
+  margin: 0;
+  color: var(--is-text);
+  font-size: 1.2rem;
+  width: auto;
+  text-align: left;
+}
+.is-modal .checklist label:last-child { border-bottom: 0; }
+.is-modal .checklist label.off { color: var(--is-muted); cursor: default; }
+.is-modal .checklist input[type=checkbox] { margin: 0; width: auto; }
+.is-modal .checklist .why { margin-left: auto; font-size: 1.05rem; color: var(--is-muted); }
+.is-modal .err { color: var(--is-red); font-size: 1.2rem; margin: 6px 0 0; min-height: 1.2em; }
+
+/* ── modal ─────────────────────────────────────────────────── */
+.is-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.55);
+  z-index: 10000;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 60px 16px 16px;
+  overflow-y: auto;
+}
+.is-modal {
+  background: var(--mild-background-color, #242528);
+  color: var(--text-color, #d8d4cc);
+  border: 1px solid var(--border-color, #3a3833);
+  border-radius: 4px;
+  width: 100%;
+  max-width: 520px;
+  box-shadow: 0 12px 40px rgba(0,0,0,0.45);
+  font-size: 1.3rem;
+  line-height: 1.45;
+  text-align: left;
+}
+.is-modal.wide { max-width: 760px; }
+.is-modal-head {
+  display: flex;
+  align-items: center;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border-color, #3a3833);
+}
+.is-modal-head h3 { margin: 0; font-size: 1.45rem; font-weight: 600; text-transform: none; letter-spacing: 0; color: inherit; }
+.is-modal-head .x {
+  margin-left: auto;
+  appearance: none;
+  background: transparent;
+  border: 0;
+  color: var(--alt-text-color, #8f8b82);
+  font-size: 1.8rem;
+  line-height: 1;
+  cursor: pointer;
+  padding: 0 4px;
+}
+.is-modal-head .x:hover { color: var(--text-color, #d8d4cc); }
+.is-modal-body { padding: 16px; }
+.is-modal-body p { margin: 0 0 10px; }
+.is-modal-foot {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+  padding: 12px 16px;
+  border-top: 1px solid var(--border-color, #3a3833);
+}
+.is-modal .btn { composes: none; }
+.is-modal .mono { font-family: ui-monospace, Menlo, Consolas, monospace; }
+.is-modal .muted { color: var(--alt-text-color, #8f8b82); }
+.is-modal .kv { display: grid; grid-template-columns: max-content 1fr; gap: 4px 14px; margin: 0 0 12px; font-size: 1.2rem; }
+.is-modal .kv dt { color: var(--alt-text-color, #8f8b82); margin: 0; }
+.is-modal .kv dd { margin: 0; font-family: ui-monospace, Menlo, Consolas, monospace; word-break: break-all; }
+
+/* modal buttons reuse the page button styles */
+.is-modal .btn {
+  appearance: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background: var(--brand-orange, #f15a2c);
+  color: #fff;
+  border: 1px solid transparent;
+  border-radius: 3px;
+  padding: 6px 13px;
+  margin: 0;
+  font: inherit;
+  font-size: 1.25rem;
+  font-weight: 500;
+  cursor: pointer;
+  text-transform: none;
+  letter-spacing: 0;
+  box-shadow: none;
+  text-shadow: none;
+  background-image: none;
+  min-width: 0;
+}
+.is-modal .btn:hover { filter: brightness(1.12); color: #fff; }
+.is-modal .btn:disabled, .is-modal .btn.working { opacity: 0.55; cursor: default; filter: none; pointer-events: none; }
+.is-modal .btn.btn-outline { background: transparent; color: var(--text-color, #d8d4cc); border-color: var(--border-color, #3a3833); }
+.is-modal .btn.btn-outline:hover { border-color: var(--alt-text-color, #8f8b82); filter: none; }
+.is-modal .btn.btn-danger { background: var(--red-500, #cf545e); }
+
+/* ── toast ─────────────────────────────────────────────────── */
+.is-toasts { position: fixed; right: 18px; bottom: 18px; z-index: 10001; display: flex; flex-direction: column; gap: 8px; }
+.is-toast {
+  background: var(--mild-background-color, #242528);
+  color: var(--text-color, #d8d4cc);
+  border: 1px solid var(--border-color, #3a3833);
+  border-left: 3px solid var(--green-500, #82a35c);
+  border-radius: 3px;
+  padding: 9px 14px;
+  font-size: 1.25rem;
+  box-shadow: 0 6px 20px rgba(0,0,0,0.35);
+  max-width: 420px;
+  animation: is-toast-in 0.15s ease-out;
+}
+.is-toast.error { border-left-color: var(--red-500, #cf545e); }
+.is-toast.info { border-left-color: var(--brand-orange, #f15a2c); }
+@keyframes is-toast-in { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+
+/* ── misc ──────────────────────────────────────────────────── */
+#iscsi-app .is-foot { margin-top: 18px; font-size: 1.1rem; color: var(--is-muted); display: flex; gap: 14px; flex-wrap: wrap; }
+#iscsi-app .spinner {
+  display: inline-block;
+  width: 14px; height: 14px;
+  border: 2px solid var(--is-border);
+  border-top-color: var(--is-primary);
+  border-radius: 50%;
+  animation: is-spin 0.8s linear infinite;
+  vertical-align: middle;
+  margin-right: 6px;
+}
+@keyframes is-spin { to { transform: rotate(360deg); } }

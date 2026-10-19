@@ -1,0 +1,4 @@
+packages/
+__pycache__/
+*.pyc
+src/usr/local/emhttp/plugins/iscsi.manager/VERSION

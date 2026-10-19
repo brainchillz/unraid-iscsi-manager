@@ -1,0 +1,128 @@
+<?xml version='1.0' standalone='yes'?>
+
+<!DOCTYPE PLUGIN [
+<!ENTITY name       "iscsi.manager">
+<!ENTITY author     "otnops">
+<!ENTITY version    "2026.10.19">
+<!ENTITY launch     "Settings/iSCSIManager">
+<!ENTITY gitURL     "https://raw.githubusercontent.com/otnops/unraid-iscsi/main">
+<!ENTITY pluginURL  "&gitURL;/&name;.plg">
+<!ENTITY supportURL "https://github.com/otnops/unraid-iscsi">
+<!ENTITY plugin     "/boot/config/plugins/&name;">
+<!ENTITY emhttp     "/usr/local/emhttp/plugins/&name;">
+<!ENTITY packageMD5 "1b64a36a5bb41ce01fdd521d296af059">
+<!ENTITY runtimeVER "2.1.54b">
+<!ENTITY runtimePKG "iSCSI-&runtimeVER;-Unraid-1">
+<!ENTITY runtimeURL "https://github.com/SimonFair/unraid.iSCSI/releases/download/&runtimeVER;/&runtimePKG;.txz">
+<!ENTITY runtimeMD5 "ef92d3f3cd28e04dd79e4dea6eaae8fb">
+<!ENTITY libffiPKG  "libffi-3.3-x86_64-3">
+<!ENTITY libffiURL  "https://raw.githubusercontent.com/SimonFair/unraid.iSCSI/main/packages/&libffiPKG;.txz">
+<!ENTITY libffiMD5  "ebb7ee0428c869f3f8ae4d8f60fa0259">
+]>
+
+<PLUGIN name="&name;"
+        author="&author;"
+        version="&version;"
+        launch="&launch;"
+        pluginURL="&pluginURL;"
+        support="&supportURL;"
+        icon="iscsi.png"
+        min="6.12.0">
+
+<CHANGES>
+###2026.10.19
+- Initial release: single-page iSCSI target manager built on rtslib.
+- Targets, LUNs, initiator ACLs, CHAP, portals, backstores (fileio / block), live sessions.
+- Shares its configuration file (/boot/config/iscsi/saveconfig.json) with the unraid.iSCSI plugin.
+</CHANGES>
+
+<!--
+The targetcli / rtslib runtime (python 3.9 + targetcli-fb 2.1.54) is the package
+published by SimonFair for the unraid.iSCSI plugin. It is downloaded once and only
+installed when targetcli is not already present on the system.
+-->
+<FILE Name="&plugin;/packages/&runtimePKG;.txz">
+<URL>&runtimeURL;</URL>
+<MD5>&runtimeMD5;</MD5>
+</FILE>
+
+<FILE Name="&plugin;/packages/&libffiPKG;.txz">
+<URL>&libffiURL;</URL>
+<MD5>&libffiMD5;</MD5>
+</FILE>
+
+<!-- the plugin itself -->
+<FILE Name="&plugin;/&name;-&version;.txz" Run="upgradepkg --install-new">
+<URL>&gitURL;/packages/&name;-&version;.txz</URL>
+<MD5>&packageMD5;</MD5>
+</FILE>
+
+<FILE Run="/bin/bash">
+<INLINE>
+set -u
+echo "+==============================================================================="
+echo "| Installing &name; &version;"
+echo "+==============================================================================="
+
+# ---- runtime -----------------------------------------------------------------
+if [ ! -x /usr/bin/targetcli ] || ! /usr/bin/python3 -c 'import rtslib_fb' 2>/dev/null; then
+  echo "Installing iSCSI runtime (&runtimePKG;)"
+  /sbin/installpkg "&plugin;/packages/&runtimePKG;.txz" >/dev/null
+else
+  echo "iSCSI runtime already installed"
+fi
+# python in that package is linked against libffi.so.6/7; newer Unraid ships .so.8
+if [ ! -e /usr/lib64/libffi.so.7 ]; then
+  /sbin/installpkg "&plugin;/packages/&libffiPKG;.txz" >/dev/null
+fi
+if [ ! -e /usr/lib64/libffi.so.6 ] &amp;&amp; [ -e /usr/lib64/libffi.so.7 ]; then
+  ln -sf /usr/lib64/libffi.so.7 /usr/lib64/libffi.so.6
+fi
+
+# ---- persistent config (same locations as unraid.iSCSI, so both plugins agree) ----
+mkdir -p /etc/target /boot/config/iscsi/.targetcli /root/.targetcli /etc/target/backup
+if [ ! -L /etc/target/saveconfig.json ]; then
+  if [ -f /etc/target/saveconfig.json ] &amp;&amp; [ ! -f /boot/config/iscsi/saveconfig.json ]; then
+    mv /etc/target/saveconfig.json /boot/config/iscsi/saveconfig.json
+  fi
+  rm -f /etc/target/saveconfig.json
+  ln -s /boot/config/iscsi/saveconfig.json /etc/target/saveconfig.json
+fi
+[ -e /root/.targetcli/prefs.bin ] || ln -s /boot/config/iscsi/.targetcli/prefs.bin /root/.targetcli/prefs.bin
+
+chmod +x &emhttp;/event/* &emhttp;/include/iscsi_ctl.py 2>/dev/null
+
+# ---- bring the saved config up if the array is already running --------------
+if [ -n "$(pidof emhttpd)" ] &amp;&amp; grep -q '^fsState="Started"' /var/local/emhttp/var.ini 2>/dev/null \
+   &amp;&amp; [ -s /etc/target/saveconfig.json ] \
+   &amp;&amp; [ -z "$(ls /sys/kernel/config/target/iscsi 2>/dev/null | grep '^iqn')" ]; then
+  echo "Restoring saved iSCSI configuration"
+  /usr/bin/targetcli restoreconfig 2>&amp;1 | logger -t &name;
+fi
+
+# ---- tidy old versions --------------------------------------------------------
+rm -f $(ls &plugin;/&name;-*.txz 2>/dev/null | grep -v '&version;')
+
+echo ""
+echo "-----------------------------------------------------------"
+echo " &name; has been installed."
+echo " Version: &version;"
+echo " Open Settings > iSCSI Manager."
+echo "-----------------------------------------------------------"
+echo ""
+</INLINE>
+</FILE>
+
+<FILE Run="/bin/bash" Method="remove">
+<INLINE>
+echo "Removing &name;"
+removepkg &name;-&version; >/dev/null 2>&amp;1
+rm -rf &emhttp;
+rm -rf &plugin;
+# The targetcli runtime and the live iSCSI configuration are intentionally left
+# in place: removing the GUI must not take storage away from connected hosts.
+echo "&name; has been removed. The iSCSI runtime and configuration were kept."
+</INLINE>
+</FILE>
+
+</PLUGIN>
