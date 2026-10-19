@@ -11,7 +11,7 @@
 <!ENTITY supportURL "https://gitlab.onthenile.net/brainchill/unraid-iscsi">
 <!ENTITY plugin     "/boot/config/plugins/&name;">
 <!ENTITY emhttp     "/usr/local/emhttp/plugins/&name;">
-<!ENTITY packageMD5 "4ce9d2ec8d215f864426f9435ad9f3c5">
+<!ENTITY packageMD5 "1802d35a3cf5ba754ec3784330db97b8">
 ]>
 
 <PLUGIN name="&name;"
@@ -52,8 +52,8 @@ fi
 mountpoint -q /sys/kernel/config || mount -t configfs none /sys/kernel/config 2>/dev/null || true
 
 # 2. Runtime self-check (python + rtslib + targetcli are inside this package).
-if /usr/bin/python3 -c 'import rtslib_fb, ctypes' >/dev/null 2>&amp;1 &amp;&amp; [ -x /usr/bin/targetcli ]; then
-  echo "iSCSI runtime OK ($(/usr/bin/targetcli --version 2>/dev/null))"
+if RTV=$(/usr/bin/python3 -c 'import rtslib_fb, ctypes, targetcli; print(rtslib_fb.__version__)' 2>/dev/null) &amp;&amp; [ -x /usr/bin/targetcli ]; then
+  echo "iSCSI runtime OK (targetcli 2.1.54, rtslib $RTV)"
 else
   log "ERROR: the bundled iSCSI runtime does not work on this system; the manager page will report this"
 fi

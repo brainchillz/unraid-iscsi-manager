@@ -63,7 +63,12 @@ for item in zin.infolist():
     data = zin.read(item.filename)
     if item.filename == 'targetcli/ui_backstore.py':
         assert old in data, 'gi import line not found; targetcli version changed?'
-        data = data.replace(old, new); patched = True
+        data = data.replace(old, new)
+        # the tcmu-runner D-Bus probe runs at every start; skip it without gi
+        probe = b'        bus = Gio.bus_get_sync(Gio.BusType.SYSTEM, None)\n'
+        assert probe in data, 'tcmu probe not found; targetcli version changed?'
+        data = data.replace(probe, b'        if Gio is None:\n            return\n' + probe)
+        patched = True
     zout.writestr(item, data)
 zin.close(); zout.close()
 assert patched, 'ui_backstore.py not found in egg'
