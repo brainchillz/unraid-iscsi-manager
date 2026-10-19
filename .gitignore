@@ -2,3 +2,6 @@ __pycache__/
 *.pyc
 src/usr/local/emhttp/plugins/iscsi.manager/VERSION
 # packages/ is committed on purpose: the .plg installs straight from this repo's raw URLs.
+# built packages are published as GitHub release assets, not committed
+packages/iscsi.manager-*.txz
+packages/iscsi.manager-*.txz.md5

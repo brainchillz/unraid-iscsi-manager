@@ -33,7 +33,7 @@ Plugins > Install Plugin, paste the `.plg` URL:
 https://raw.githubusercontent.com/brainchillz/unraid-iscsi-manager/main/iscsi.manager.plg
 ```
 
-That downloads a single ~10 MB package to the flash drive, installs it, loads
+That fetches the matching release package (a single ~10 MB file) to the flash drive, installs it, loads
 the kernel target modules and restores any saved configuration. Open
 Settings > iSCSI Manager. A fresh Unraid box needs nothing else.
 
@@ -79,7 +79,11 @@ installed package (such as unraid.iSCSI's runtime) also owns.
 ./build.sh [version]       # build the package and stamp the .plg
 ./install-local.sh         # build, copy to the flash drive, install via `plugin install`
 ./deploy-dev.sh            # rsync src/ into the live webGui (fast loop, not persistent)
+./release.sh [version]     # build, commit the stamped .plg, tag, publish a GitHub release
 ```
+
+Releases carry the package as an asset; the `.plg` in `main` always points at
+the release with the same version number.
 
 The two remote scripts read the host from `UNRAID_HOST` (default
 `192.168.35.2`) and root credentials from `UNRAID_CREDS` (default `../unraid-cred`).

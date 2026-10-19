@@ -5,8 +5,9 @@
 <!ENTITY author     "brainchill">
 <!ENTITY version    "2026.10.19">
 <!ENTITY launch     "Settings/iSCSIManager">
-<!-- The one place the package is downloaded from. -->
+<!-- The .plg lives in the repo (stable URL for update checks); the package is a GitHub release asset. -->
 <!ENTITY gitURL     "https://raw.githubusercontent.com/brainchillz/unraid-iscsi-manager/main">
+<!ENTITY releaseURL "https://github.com/brainchillz/unraid-iscsi-manager/releases/download/&version;">
 <!ENTITY pluginURL  "&gitURL;/&name;.plg">
 <!ENTITY supportURL "https://github.com/brainchillz/unraid-iscsi-manager">
 <!ENTITY plugin     "/boot/config/plugins/&name;">
@@ -33,7 +34,7 @@
 
 <!-- The only download: GUI + runtime in one Slackware package, cached on the flash drive. -->
 <FILE Name="&plugin;/&name;-&version;.txz" Run="upgradepkg --install-new">
-<URL>&gitURL;/packages/&name;-&version;.txz</URL>
+<URL>&releaseURL;/&name;-&version;.txz</URL>
 <MD5>&packageMD5;</MD5>
 </FILE>
 
