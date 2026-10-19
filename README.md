@@ -1,9 +1,12 @@
 # iSCSI Manager for Unraid
 
-A single-page iSCSI target manager for Unraid 6.12+ / 7.x, built as a
-replacement front end for the [unraid.iSCSI](https://github.com/SimonFair/unraid.iSCSI)
-plugin. Same kernel target (LIO), same `targetcli` runtime, same configuration
-file, but one readable page instead of seven tabs of raw `targetcli ls` output.
+A single-page iSCSI target manager for Unraid 6.12+ / 7.x. One plugin, one
+package, nothing else to install: the package carries the web page and the
+complete targetcli / rtslib runtime it needs.
+
+It was written as a replacement front end for the
+[unraid.iSCSI](https://github.com/SimonFair/unraid.iSCSI) plugin and reads the
+same configuration file, so an existing setup is picked up as is.
 
 ![screenshot](docs/screenshot-black.png)
 
@@ -22,6 +25,21 @@ file, but one readable page instead of seven tabs of raw `targetcli ls` output.
 * Follows the Unraid theme (white / black / azure / gray) via the webGui's own
   CSS variables.
 
+## Installing
+
+Plugins > Install Plugin, paste the `.plg` URL:
+
+```
+https://gitlab.onthenile.net/brainchill/unraid-iscsi/-/raw/main/iscsi.manager.plg
+```
+
+That downloads a single ~10 MB package to the flash drive, installs it, loads
+the kernel target modules and restores any saved configuration. Open
+Settings > iSCSI Manager. A fresh Unraid box needs nothing else.
+
+Removing the plugin never touches live targets: hosts keep their disks until
+the next reboot, and the saved configuration stays on the flash drive.
+
 ## How it works
 
 ```
@@ -33,47 +51,38 @@ event/disks_mounted         restores the saved config when the array starts
 event/unmounting_disks      clears the live config so the array can stop
 ```
 
-Reading state through rtslib takes ~0.15 s and gives structured data, so
+Reading state through rtslib takes about 0.15 s and gives structured data, so
 there is no parsing of `targetcli` output anywhere. Mutations take a file lock,
 apply the change through rtslib, save the config, and return the fresh state in
 the same response.
 
-## Installing
+## The package
 
-The plugin needs the targetcli runtime (Python 3.9 + targetcli-fb). The `.plg`
-downloads SimonFair's runtime package and installs it only if `targetcli` is
-not already on the system, so it coexists with the original plugin and shares
-its configuration.
+`build.sh` produces `packages/iscsi.manager-<version>.txz` from:
 
-**From a release URL** (Plugins > Install Plugin):
+* `src/` - the plugin files
+* `packages/runtime/iSCSI-*-Unraid-*.txz` - Python 3.9, targetcli-fb 2.1.54,
+  rtslib-fb 2.1.75, configshell-fb 1.1.29 (the Slackware build ich777 made for
+  the unraid.iSCSI plugin, GPL)
+* `packages/runtime/libffi-3.3-*.txz` - the libffi.so.7 that Python links against
 
-```
-https://raw.githubusercontent.com/<you>/unraid-iscsi/main/iscsi.manager.plg
-```
+The runtime is trimmed to what is used (Python's test suite, IDLE, tkinter,
+pip, headers, docs and the GObject stack are dropped: 44 MB on disk instead of
+220 MB), and targetcli's import of `gi`, needed only for tcmu-runner, is made
+optional. The result is a normal Slackware package: `installpkg` puts it in
+place, `removepkg` takes it out again while leaving files that another
+installed package (such as unraid.iSCSI's runtime) also owns.
 
-Update `gitURL` in `iscsi.manager.plg` and host `packages/iscsi.manager-<ver>.txz`
-at that location.
-
-**Straight from this checkout** (no hosting needed):
-
-```
-./install-local.sh        # builds the package, copies it to the flash, runs `plugin install`
-```
-
-**Fast development loop** (not persistent across reboots):
+## Development
 
 ```
-./deploy-dev.sh           # rsync src/ into the live webGui; reload the page
+./build.sh [version]       # build the package and stamp the .plg
+./install-local.sh         # build, copy to the flash drive, install via `plugin install`
+./deploy-dev.sh            # rsync src/ into the live webGui (fast loop, not persistent)
 ```
 
-Both scripts read the host from `UNRAID_HOST` (default `192.168.35.2`) and the
-root credentials from `UNRAID_CREDS` (default `../unraid-cred`).
-
-## Building
-
-```
-./build.sh [version]      # -> packages/iscsi.manager-<version>.txz and stamps the .plg
-```
+The two remote scripts read the host from `UNRAID_HOST` (default
+`192.168.35.2`) and root credentials from `UNRAID_CREDS` (default `../unraid-cred`).
 
 ## Notes and limits
 
@@ -81,6 +90,4 @@ root credentials from `UNRAID_CREDS` (default `../unraid-cred`).
   initiator expects.
 * CHAP is per initiator ACL. Target-wide CHAP for shared (demo) mode targets is
   not exposed yet.
-* Removing the plugin keeps the runtime and the live targets; it never takes
-  storage away from connected hosts.
 * A `saveconfig.json` backup is left in `/etc/target/backup/` by rtslib on every save.
