@@ -106,6 +106,11 @@ echo "Removing &name;"
 removepkg &name;-&version; >/dev/null 2>&amp;1
 rm -rf &emhttp;
 rm -rf &plugin;
+# removepkg only drops symlinks declared in doinst.sh; clean up ours if dangling
+for l in /usr/bin/python3 /usr/lib64/libffi.so.7 /root/.targetcli/prefs.bin; do
+  [ -L "$l" ] &amp;&amp; [ ! -e "$l" ] &amp;&amp; rm -f "$l"
+done
+rmdir /root/.targetcli 2>/dev/null
 echo "&name; has been removed. The saved iSCSI configuration in /boot/config/iscsi was kept."
 </INLINE>
 </FILE>
