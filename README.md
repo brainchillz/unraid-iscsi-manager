@@ -8,7 +8,7 @@ It was written as a replacement front end for the
 [unraid.iSCSI](https://github.com/SimonFair/unraid.iSCSI) plugin and reads the
 same configuration file, so an existing setup is picked up as is.
 
-![screenshot](docs/screenshot-black.png)
+![iSCSI Manager page](docs/screenshot.png)
 
 ## What it does
 
