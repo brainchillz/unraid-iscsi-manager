@@ -11,7 +11,7 @@
 <!ENTITY supportURL "https://gitlab.onthenile.net/brainchill/unraid-iscsi">
 <!ENTITY plugin     "/boot/config/plugins/&name;">
 <!ENTITY emhttp     "/usr/local/emhttp/plugins/&name;">
-<!ENTITY packageMD5 "1802d35a3cf5ba754ec3784330db97b8">
+<!ENTITY packageMD5 "56fad5ab574125335802022434589e6b">
 ]>
 
 <PLUGIN name="&name;"
